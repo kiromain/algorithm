@@ -4,21 +4,76 @@
 
 using namespace std;
 
+int NO_PARENT = -1;
 
-
-
-vector<vector<int> > dijkstra(vector<vector<int> > matrix)
+void printPath(int currentVertex, vector<int> parents)
 {
-     vector<vector<int> > aList(matrix.size());
 
-     for(int i=0;i<matrix.size();i++){
-          for(int j=0;j<matrix[i].size();j++){
-               if(matrix[i][j] == 1){
-                    aList[i].push_back(j);
+    // Base case : Source node has
+    // been processed
+    if (currentVertex == NO_PARENT) {
+        return;
+    }
+    printPath(parents[currentVertex], parents);
+    cout << currentVertex << " ";
+}
+
+void printS(int startVertex, vector<int> distances,
+                   vector<int> parents)
+{
+    int nVertices = distances.size();
+    cout << "Vertex\t Distance\tPath";
+
+    for (int vertexIndex = 0; vertexIndex < nVertices;
+         vertexIndex++) {
+        if (vertexIndex != startVertex) {
+            cout << "\n" << startVertex << " -> ";
+            cout << vertexIndex << " \t\t ";
+            cout << distances[vertexIndex] << "\t\t";
+            printPath(vertexIndex, parents);
+        }
+    }
+}
+
+void dijkstra(vector<vector<int> > adjMatrix,int svertex)
+{
+     int nVertices = adjMatrix[0].size();
+     //shortesdistances
+     vector<int> sds(nVertices);
+     vector<bool> added(nVertices);
+
+     for(int i=0;i<nVertices;i++){
+          sds[i]=INT_MAX;
+          added[i]=false;
+     }
+
+     sds[svertex] = 0;
+
+     vector<int> parents(nVertices);
+
+     parents[svertex] = NO_PARENT;
+
+     for(int i=1;i<nVertices;i++){
+          int nearestvertex = -1;
+          int sd = INT_MAX;
+          for(int j=0;j<nVertices;j++){
+               if(!added[j] && sds[j] < sd){
+                    nearestvertex = j;
+                    sd = sds[j];
                }
           }
+
+          added[nearestvertex] = true;
+
+          for (int j = 0; j < nVertices;j++) {
+            int edgeDistance= adjMatrix[nearestvertex][j];
+            if (edgeDistance > 0 && ((sd + edgeDistance)< sds[j])) {
+                parents[j] = nearestvertex;
+                sds[j]= sd + edgeDistance;
+            }
+        }
      }
-     return aList;
+     printS(svertex,sds,parents);
 }
 
 int main()
@@ -58,18 +113,12 @@ int main()
           cout<<endl;
      }
      cout<<endl;
-     vector<vector<int> > alist = dijkstra(matrix);
 
-     cout<<"\nAdjacency list: "<<endl;
-     for(int i=0;i<alist.size();i++){
-          cout<<i;
-          for(int j=0;j<alist[i].size();j++){
-               if(j==alist[i].size() - 1){
-                    cout<<"->"<<alist[i][j]<<endl;
-                    break;
-               }else cout<<"->"<<alist[i][j];
-          }
-     }
+     int i;
+     cout<<"Insert a starting vertex: "<<endl;
+     cin>>i;
+     dijkstra(matrix,i);
+
      return 0;
 
 }
